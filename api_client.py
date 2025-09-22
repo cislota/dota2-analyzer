@@ -24,7 +24,7 @@ if __name__ == "__main__":
         data = get_recent_matches(test_id, count=3)
         print("Пример данных:")
         for match in data:
-            print(match.keys())  #ключи, чтобы понять структуру
+            #print(match.keys())  #hz che s etoi infoi delat`
             print(f"Match ID: {match['match_id']}, Hero ID: {match['hero_id']}, Duration: {match['duration']}s")
     except Exception as e:
         print(f"Не удалось получить данные: {e}")
