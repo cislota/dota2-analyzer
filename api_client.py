@@ -1,30 +1,44 @@
-#api client
+from __future__ import annotations
 
 import requests
 
-OPENDOTA_API = "https://api.opendota.com/api"
+from utils.exceptions import OpenDotaAPIError
 
-def get_recent_matches(account_id: int, count: int = 20):
-    #Последние матчи игрока
-    #account_id: ID игрока
-    #count: количество матчей (max. 20)
-    #return: список матчей в формате JSON
-    
-    url = f"{OPENDOTA_API}/players/{account_id}/recentMatches"
-    response = requests.get(url, params={"limit": count})
-    response.raise_for_status()
-    return response.json()
+OPENDOTA_API_URL = "https://api.opendota.com/api"
+DEFAULT_LIMIT = 20
+REQUEST_TIMEOUT = 15
 
-#test connection 
 
-if __name__ == "__main__":
+def get_recent_matches(account_id: int, limit: int = DEFAULT_LIMIT) -> list[dict]:
+    """Fetch recent Dota 2 matches for a player from OpenDota."""
+    if account_id <= 0:
+        raise ValueError("account_id must be a positive integer")
+    if limit <= 0:
+        raise ValueError("limit must be a positive integer")
+
+    url = f"{OPENDOTA_API_URL}/players/{account_id}/recentMatches"
 
     try:
-        test_id = 1149785629  #тест id 
-        data = get_recent_matches(test_id, count=3)
-        print("Пример данных:")
-        for match in data:
-            #print(match.keys())  #hz che s etoi infoi delat`
-            print(f"Match ID: {match['match_id']}, Hero ID: {match['hero_id']}, Duration: {match['duration']}s")
-    except Exception as e:
-        print(f"Не удалось получить данные: {e}")
+        response = requests.get(url, timeout=REQUEST_TIMEOUT)
+        response.raise_for_status()
+    except requests.exceptions.RequestException as exc:
+        raise OpenDotaAPIError(f"Failed to fetch matches from OpenDota: {exc}") from exc
+
+    try:
+        matches = response.json()
+    except ValueError as exc:
+        raise OpenDotaAPIError("OpenDota returned invalid JSON") from exc
+
+    if not isinstance(matches, list):
+        raise OpenDotaAPIError("OpenDota returned an unexpected response format")
+
+    return matches[:limit]
+
+
+if __name__ == "__main__":
+    sample_matches = get_recent_matches(1149785629, limit=2)
+    for match in sample_matches:
+        print(
+            "Match ID: {match_id}, Hero ID: {hero_id}, Duration: {duration}s, "
+            "Radiant win: {radiant_win}, Player slot: {player_slot}".format(**match)
+        )
