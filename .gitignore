@@ -3,4 +3,5 @@ __pycache__/
 data/**/*.json
 data/**/*.csv
 venv/
+.venv/
 .DS_Store
