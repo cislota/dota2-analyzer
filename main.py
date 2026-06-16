@@ -5,6 +5,7 @@ import sys
 
 from analyzer import analyze_matches, format_duration
 from api_client import DEFAULT_LIMIT, get_recent_matches
+from heroes import get_hero_name
 from models import Match, PlayerStats, parse_matches
 from storage import (
     load_raw_matches,
@@ -65,7 +66,7 @@ def print_match_preview(matches: list[Match], count: int = 2) -> None:
     for match in matches[:count]:
         result = "win" if match.won else "loss"
         print(
-            f"- match_id={match.match_id}, hero_id={match.hero_id}, "
+            f"- match_id={match.match_id}, hero={get_hero_name(match.hero_id)}, "
             f"result={result}, duration={format_duration(match.duration)}"
         )
 
@@ -84,7 +85,7 @@ def print_stats(account_id: int, stats: PlayerStats) -> None:
         win_word = "win" if hero.wins == 1 else "wins"
         game_word = "game" if hero.games == 1 else "games"
         print(
-            f"{index}. Hero ID {hero.hero_id} - {hero.games} {game_word}, "
+            f"{index}. {get_hero_name(hero.hero_id)} - {hero.games} {game_word}, "
             f"{hero.wins} {win_word}, winrate {hero.winrate:.1f}%"
         )
 
