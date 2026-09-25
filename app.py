@@ -28,6 +28,13 @@ SAVE_OPTIONS = {
     "JSON и CSV": "both",
 }
 
+PLOTLY_CONFIG = {
+    "displayModeBar": True,
+    "displaylogo": False,
+    "doubleClick": "reset+autosize",
+    "responsive": True,
+}
+
 TABLE_STYLES = """
 <style>
 .data-table-wrap {
@@ -133,14 +140,14 @@ def display_analysis(matches: list[Match], stats: PlayerStats) -> None:
         st.plotly_chart(
             games_by_hero_chart(hero_table),
             width="stretch",
-            config={"displayModeBar": False},
+            config=PLOTLY_CONFIG,
         )
     with chart_columns[1]:
         st.subheader("Винрейт по героям")
         st.plotly_chart(
             winrate_by_hero_chart(hero_table),
             width="stretch",
-            config={"displayModeBar": False},
+            config=PLOTLY_CONFIG,
         )
 
     st.subheader("Последние матчи")
