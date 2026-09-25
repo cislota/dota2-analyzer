@@ -219,6 +219,7 @@ OpenDota возвращает сторону игрока в поле `player_sl
 
 - `main.py` - точка входа и CLI на `argparse`;
 - `app.py` - веб-интерфейс на Streamlit;
+- `run_app.bat` - запуск веб-интерфейса `app.py`;
 - `api_client.py` - получение матчей из OpenDota;
 - `heroes.py` - загрузка, кэширование и форматирование справочника героев;
 - `models.py` - dataclass-модели `Match`, `HeroStats`, `PlayerStats`;
