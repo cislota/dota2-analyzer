@@ -64,7 +64,7 @@ source venv/bin/activate
 Установите зависимости:
 
 ```bash
-pip install -r requirements.txt
+pip install -r reqrements.txt
 ```
 
 Если используется виртуальное окружение `.venv` в Windows:
@@ -134,7 +134,7 @@ data/processed/123456789_stats.csv
 Запустите Streamlit:
 
 ```bash
-streamlit run app.py
+streamlit run_app.py
 ```
 
 Или напрямую через виртуальное окружение:
