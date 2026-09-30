@@ -1,235 +1,104 @@
 # Dota 2 Match Analyzer
 
-Приложение для анализа последних матчей игрока Dota 2 через публичный OpenDota API. Проект поддерживает консольный интерфейс и веб-интерфейс на Streamlit.
+Dota 2 Match Analyzer получает последние матчи игрока через OpenDota и показывает простую статистику: победы, винрейт, среднюю длительность матчей и любимых героев.
 
-Приложение получает матчи по `account_id`, сохраняет сырые данные, считает базовую статистику и выводит результат в понятном виде.
+Проект создан как учебное Python-приложение с двумя интерфейсами: консольным и веб-интерфейсом на Streamlit.
+
+![Веб-интерфейс Dota 2 Match Analyzer](docs/images/ui-preview.png)
 
 ## Возможности
 
-- загрузка последних матчей игрока через OpenDota API;
-- сохранение сырых матчей в JSON;
-- расчет общего винрейта;
-- расчет побед и поражений;
-- расчет средней длительности матча;
-- группировка матчей по героям;
-- отображение имен героев вместо числовых ID;
-- сохранение результата анализа в JSON или CSV;
-- fallback на локально сохраненные матчи, если API временно недоступен.
-- просмотр статистики, таблиц и интерактивных графиков в браузере.
+- вывод статистики последних матчей по `account_id`;
+- статистика побед, поражений и длительности матчей;
+- таблицы с именами и иконками героев;
+- интерактивные графики по героям;
+- сохранение результатов в JSON и CSV;
+- работа с локальным кэшем, если OpenDota временно недоступен.
 
-## Структура проекта
+## Технологии
 
-```text
-dota2-match-analyzer/
-|-- main.py
-|-- app.py
-|-- api_client.py
-|-- heroes.py
-|-- models.py
-|-- analyzer.py
-|-- storage.py
-|-- ui_helpers.py
-|-- requirements.txt
-|-- README.md
-|-- data/
-|   |-- raw/
-|   `-- processed/
-`-- utils/
-    |-- __init__.py
-    `-- exceptions.py
-```
+![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-3776AB?logo=python&logoColor=white)
+![Requests 2.34.2](https://img.shields.io/badge/Requests-2.34.2-20232A?logo=python&logoColor=white)
+![Streamlit 1.58.0](https://img.shields.io/badge/Streamlit-1.58.0-FF4B4B?logo=streamlit&logoColor=white)
+![Pandas 3.0.3](https://img.shields.io/badge/Pandas-3.0.3-150458?logo=pandas&logoColor=white)
+![Plotly 6.8.0](https://img.shields.io/badge/Plotly-6.8.0-3F4F75?logo=plotly&logoColor=white)
 
-## Установка
+## Запуск проекта
 
-Требуется Python 3.10+.
+Создание виртуального окружения и установка зависимостей:
 
-Создайте и активируйте виртуальное окружение:
-
-```bash
-python -m venv venv
-```
-
-Windows PowerShell:
-
-```bash
-.\venv\Scripts\Activate.ps1
-```
-
-Linux/macOS:
-
-```bash
-source venv/bin/activate
-```
-
-Установите зависимости:
-
-```bash
-pip install -r reqrements.txt
-```
-
-Если используется виртуальное окружение `.venv` в Windows:
-
-```bash
+```powershell
+python -m venv .venv
 .\.venv\Scripts\Activate.ps1
+python -m pip install -r requirements.txt
 ```
 
-## Команды
+Запуск приложение:
 
-### Загрузить матчи
+```powershell
+.\run_app.bat
+```
+
+После запуска откройте [http://localhost:8501](http://localhost:8501).
+
+Для Linux и macOS:
 
 ```bash
-python main.py fetch 123456789
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install -r requirements.txt
+python -m streamlit run app.py
 ```
 
-Команда:
+## Запуск
 
-- получает последние 20 матчей игрока;
-- сохраняет сырые данные в `data/raw/123456789_matches.json`;
-- выводит краткую проверочную информацию по первым матчам.
+| Режим | Команда |
+|---|---|
+| Веб-интерфейс | `python -m streamlit run app.py` |
+| Загрузить матчи | `python main.py fetch 123456789` |
+| Выполнить анализ | `python main.py analyze 123456789` |
+| Сохранить JSON | `python main.py analyze 123456789 --save json` |
+| Сохранить CSV | `python main.py analyze 123456789 --save csv` |
 
-Можно изменить количество матчей:
+`123456789` нужно заменить на Steam32 `account_id` игрока. Параметр `--limit` меняет число матчей для анализа, например `--limit 10`.
 
-```bash
-python main.py fetch 123456789 --limit 10
+OpenDota endpoint `recentMatches` возвращает до 20 последних матчей. Значение `--limit` больше 20 не добавит более старые матчи.
+
+## Архитектура
+
+```mermaid
+flowchart LR
+    UI[Streamlit UI] --> Core[Модели и анализатор]
+    CLI[CLI] --> Core
+    API[OpenDota API] --> Client[API-клиент]
+    Client --> Core
+    Heroes[Кэш героев] --> Core
+    Core --> Storage[JSON и CSV]
 ```
 
-### Проанализировать матчи
+## API и данные
 
-```bash
-python main.py analyze 123456789
-```
+| Ресурс | Адрес или путь | Назначение |
+|---|---|---|
+| OpenDota API | `https://api.opendota.com/api` | Основной API |
+| Последние матчи | `/players/{account_id}/recentMatches` | Матчи игрока |
+| Герои | `/heroes` | Имена и данные героев |
+| Документация API | [docs.opendota.com](https://docs.opendota.com/) | Swagger и подробности методов |
+| Кэш героев | `data/heroes.json` | Справочник имен и иконок |
+| Сырые матчи | `data/raw/{account_id}_matches.json` | Ответ API |
+| Результаты | `data/processed/` | Экспорт JSON и CSV |
 
-Команда:
+При первом запуске справочник героев сохраняется локально. Если имя или изображение недоступно, приложение продолжит работу и покажет `Hero ID`.
 
-- получает последние матчи через OpenDota API;
-- сохраняет raw-данные в `data/raw/`;
-- считает статистику;
-- выводит результат в консоль.
+## Основные файлы
 
-Если API недоступен, команда попробует загрузить ранее сохраненный файл из `data/raw/`.
-
-### Сохранить анализ
-
-JSON:
-
-```bash
-python main.py analyze 123456789 --save json
-```
-
-CSV:
-
-```bash
-python main.py analyze 123456789 --save csv
-```
-
-Результаты сохраняются в:
-
-```text
-data/processed/123456789_stats.json
-data/processed/123456789_stats.csv
-```
-
-## UI-интерфейс
-
-Запустите Streamlit:
-
-```bash
-streamlit run_app.py
-```
-
-Или напрямую через виртуальное окружение:
-
-```bash
-.\.venv\Scripts\streamlit.exe run app.py
-```
-
-После запуска откройте адрес, который Streamlit покажет в терминале. Обычно это:
-
-```text
-http://localhost:8501
-```
-
-Через UI можно:
-
-- ввести `account_id` игрока;
-- выбрать от 1 до 100 матчей;
-- посмотреть количество побед и поражений, винрейт и среднюю длительность;
-- посмотреть таблицу статистики с именами и иконками героев;
-- сравнить количество игр и винрейт на интерактивных графиках;
-- посмотреть таблицу последних матчей;
-- сохранить анализ в JSON, CSV или сразу в оба формата.
-
-Консольная версия продолжает запускаться отдельно:
-
-```bash
-python main.py analyze 123456789
-```
-
-## Пример вывода
-
-```text
-Dota 2 Match Analyzer
-
-Player ID: 123456789
-Matches analyzed: 20
-
-Winrate: 60.0%
-Wins: 12
-Losses: 8
-
-Average match duration: 38:42
-
-Top heroes:
-1. Brewmaster - 5 games, 4 wins, winrate 80.0%
-2. Windranger - 3 games, 2 wins, winrate 66.7%
-3. Shadow Fiend - 2 games, 1 win, winrate 50.0%
-```
-
-## Справочник героев
-
-Имена героев загружаются из OpenDota API:
-
-```text
-https://api.opendota.com/api/heroes
-```
-
-При первом использовании справочник сохраняется в:
-
-```text
-data/heroes.json
-```
-
-Следующие запуски используют локальный кэш и не запрашивают список героев повторно. Если OpenDota недоступен и кэша еще нет, приложение продолжает работать и показывает fallback `Hero ID 78`.
-
-В Streamlit UI для героев также формируются ссылки на изображения Dota 2 CDN. Недоступная иконка не мешает отображению имени и статистики.
-
-## Как считается победа
-
-OpenDota возвращает сторону игрока в поле `player_slot`:
-
-- `player_slot < 128` - игрок был за Radiant;
-- `player_slot >= 128` - игрок был за Dire.
-
-Победа игрока определяется сравнением его стороны с `radiant_win`:
-
-- Radiant + `radiant_win=True` означает победу;
-- Dire + `radiant_win=False` означает победу.
-
-## Файлы
-
-- `main.py` - точка входа и CLI на `argparse`;
-- `app.py` - веб-интерфейс на Streamlit;
-- `run_app.bat` - запуск веб-интерфейса `app.py`;
-- `api_client.py` - получение матчей из OpenDota;
-- `heroes.py` - загрузка, кэширование и форматирование справочника героев;
-- `models.py` - dataclass-модели `Match`, `HeroStats`, `PlayerStats`;
-- `analyzer.py` - расчет статистики;
-- `storage.py` - сохранение и загрузка JSON/CSV;
-- `ui_helpers.py` - подготовка таблиц и Plotly-графиков;
-- `utils/exceptions.py` - пользовательские исключения.
-
-## Источник данных
-
-OpenDota API:
-
-https://api.opendota.com/api
+| Файл | Назначение |
+|---|---|
+| `app.py` | Streamlit UI |
+| `main.py` | CLI-команды |
+| `api_client.py` | Получение матчей |
+| `heroes.py` | Имена, иконки и кэш героев |
+| `models.py` | Модели данных |
+| `analyzer.py` | Расчет статистики |
+| `storage.py` | Чтение и сохранение файлов |
+| `ui_helpers.py` | Таблицы и графики |
